@@ -1,0 +1,85 @@
+# calculator.py
+import tkinter as tk
+from tkinter import messagebox
+
+def add(a, b): return a + b
+def sub(a, b): return a - b
+def mul(a, b): return a * b
+def div(a, b):
+    if b == 0:
+        raise ZeroDivisionError("Деление на ноль")
+    return a / b
+def pow_(a, b): return a ** b
+def sqrt_(a):
+    if a < 0:
+        raise ValueError("Корень из отрицательного числа")
+    return a ** 0.5
+def fact(n):
+    if n < 0 or int(n) != n:
+        raise ValueError("Факториал определён для целых неотрицательных чисел")
+    res = 1
+    for i in range(2, int(n)+1):
+        res *= i
+    return res
+
+class Memory:
+    def __init__(self): self._m = 0.0
+    def save(self, x): self._m = float(x)
+    def read(self): return self._m
+    def add_to_mem(self, x): self._m += float(x)
+    def clear(self): self._m = 0.0
+
+class CalculatorApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title('Калькулятор')
+        self.geometry('340x460')
+        self.resizable(False, False)
+        self.mem = Memory()
+        self.expr_var = tk.StringVar(value='0')
+        self._build_ui()
+
+    def _build_ui(self):
+        entry = tk.Entry(self, textvariable=self.expr_var, font=('Arial', 18), justify='right', bd=2, relief='sunken')
+        entry.grid(row=0, column=0, columnspan=5, sticky='we', padx=5, pady=5)
+        btns = [
+            ('7',1,0),('8',1,1),('9',1,2),('/',1,3),('C',1,4),
+            ('4',2,0),('5',2,1),('6',2,2),('*',2,3),('M+',2,4),
+            ('1',3,0),('2',3,1),('3',3,2),'-',3,3,('M-',3,4),
+            ('0',4,0),('.',4,1),('=',4,2),('+',4,3),('MR',4,4),
+            ('^',5,0),('√',5,1),('!',5,2),('MC',5,3),('',5,4),
+        ]
+        for txt,r,c in btns:
+            if not txt: continue
+            cmd = lambda t=txt: self._on_btn(t)
+            b = tk.Button(self, text=txt, width=5, height=2, command=cmd)
+            b.grid(row=r, column=c, padx=2, pady=2)
+        mc = tk.Button(self, text='MC', width=5, height=2, command=lambda:self.mem.clear())
+        mr = tk.Button(self, text='MR', width=5, height=2, command=lambda:self.expr_var.set(str(self.mem.read())))
+        mp = tk.Button(self, text='M+', width=5, height=2, command=lambda:self.mem.add_to_mem(float(self.expr_var.get() or 0)))
+        mm = tk.Button(self, text='M-', width=5, height=2, command=lambda:self.mem.add_to_mem(-float(self.expr_var.get() or 0)))
+        mc.grid(row=5,column=3,padx=2,pady=2); mr.grid(row=4,column=4,padx=2,pady=2)
+        mp.grid(row=2,column=4,padx=2,pady=2); mm.grid(row=3,column=4,padx=2,pady=2)
+
+    def _on_btn(self, label):
+        cur = self.expr_var.get()
+        if label == 'C':
+            self.expr_var.set('0')
+            return
+        if label == '=':
+            expr = cur.replace('^', '**')
+            try:
+                val = eval(expr, {'__builtins__': None}, {
+                    'add': add, 'sub': sub, 'mul': mul, 'div': div,
+                    'pow_': pow_, 'sqrt_': sqrt_, 'fact': fact,
+                })
+                self.expr_var.set(str(val))
+            except Exception as e:
+                messagebox.showerror('Ошибка', str(e))
+                self.expr_var.set('0')
+            return
+        if label == '^': op = '**'
+        elif label == '√':
+            try:
+                val = sqrt_(float(cur))
+                self.expr_var.set(str(val))         
