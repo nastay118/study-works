@@ -1,0 +1,57 @@
+# test_calculator.py
+import unittest
+from calculator import add, sub, mul, div, pow_, sqrt_, fact, Memory, CalculatorApp
+
+
+class TestCalculatorFunctions(unittest.TestCase):
+    """Тесты функций калькулятора"""
+
+    def test_add(self):
+        self.assertEqual(add(2, 3), 5)
+        self.assertAlmostEqual(add(2.5, 1.2), 3.7)
+
+    def test_sub(self):
+        self.assertEqual(sub(5, 3), 2)
+        self.assertAlmostEqual(sub(5.5, 2.2), 3.3)
+
+    def test_mul(self):
+        self.assertEqual(mul(4, 3), 12)
+        self.assertAlmostEqual(mul(2.5, 4), 10.0)
+
+    def test_div(self):
+        self.assertEqual(div(6, 3), 2)
+        self.assertAlmostEqual(div(7, 2), 3.5)
+
+    def test_div_zero(self):
+        with self.assertRaises(ZeroDivisionError):
+            div(5, 0)
+
+    def test_pow(self):
+        self.assertEqual(pow_(2, 3), 8)
+        self.assertAlmostEqual(pow_(9, 0.5), 3.0)
+
+    def test_sqrt(self):
+        self.assertAlmostEqual(sqrt_(16), 4.0)
+        with self.assertRaises(ValueError):
+            sqrt_(-1)
+
+    def test_fact(self):
+        self.assertEqual(fact(5), 120)
+        self.assertEqual(fact(0), 1)
+        with self.assertRaises(ValueError):
+            fact(-3)
+        with self.assertRaises(ValueError):
+            fact(3.5)  # не целое число
+
+    def test_memory(self):
+        m = Memory()
+        m.save(10)
+        self.assertEqual(m.read(), 10)
+        m.add_to_mem(5)
+        self.assertEqual(m.read(), 15)
+        m.clear()
+        self.assertEqual(m.read(), 0)
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
